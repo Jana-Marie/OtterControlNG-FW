@@ -4,8 +4,8 @@ import sys
 
 comps = []
 
-header = open(sys.argv[1] + '/inc/hal_tbl.h', 'w')
-code = open(sys.argv[1] + '/src/hal_tbl.c', 'w')
+header = open(sys.argv[1] + '/Inc/hal_tbl.h', 'w')
+code = open(sys.argv[1] + '/Src/hal_tbl.c', 'w')
 
 for infile in sys.argv[2:]:
     with open(infile) as f:
