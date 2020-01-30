@@ -132,13 +132,38 @@ int main(void)
 
   /* USER CODE END 2 */
  
- 
+  PWM_U = 0;
+  PWM_V = 0;
+  PWM_W = 0;
+
+  
+  if(HAL_TIM_Base_Start_IT(&htim1) != HAL_OK) {
+    Error_Handler();
+  }
+
+  if(HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) != HAL_OK) {
+    Error_Handler();
+  }
+  if(HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2) != HAL_OK) {
+    Error_Handler();
+  }
+  if(HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3) != HAL_OK) {
+    Error_Handler();
+  }
+  if(HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1) != HAL_OK) {
+    Error_Handler();
+  }
+  if(HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2) != HAL_OK) {
+    Error_Handler();
+  }
+  if(HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3) != HAL_OK) {
+    Error_Handler();
+  }
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   hal_init(1.0 / 20000.0, 0.0);
   // hal load comps
-  hal_parse("debug_level 1");
   hal_parse("load term");
   hal_parse("load sim");
   hal_parse("term0.rt_prio = 15");

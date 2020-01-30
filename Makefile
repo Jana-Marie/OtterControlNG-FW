@@ -151,6 +151,12 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-
 CFLAGS += -DHAL_MAX_PINS=128
 CFLAGS += -DHAL_MAX_SOMPS=8
 CFLAGS += -DHAL_MAX_CTX=512
+CFLAGS += -std=gnu11
+CFLAGS += -Wmaybe-uninitialized
+CFLAGS += -Wuninitialized
+CFLAGS += -fno-builtin
+CFLAGS += -nostartfiles
+CFLAGS += -Wfatal-errors
 
 
 ifeq ($(DEBUG), 1)
