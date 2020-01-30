@@ -5,3 +5,10 @@
 
 #define PWM_DEADTIME 40 // 40/170e6 = 235ns
 #define PWM_RES 4250 // 170e6 / 4250 = 40kHz center aligned pwm
+
+#define HALL_A_PIN GPIO_PIN_6
+#define HALL_A_PORT GPIOB
+#define HALL_B_PIN GPIO_PIN_7
+#define HALL_B_PORT GPIOB
+#define HALL_C_PIN GPIO_PIN_8
+#define HALL_C_PORT GPIOB

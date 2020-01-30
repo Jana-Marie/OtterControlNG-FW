@@ -160,6 +160,13 @@ int main(void)
     Error_Handler();
   }
 
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  GPIO_InitStruct.Pin = HALL_A_PIN|HALL_B_PIN|HALL_C_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(HALL_A_PORT, &GPIO_InitStruct);
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   hal_init(1.0 / 20000.0, 0.0);
@@ -200,12 +207,14 @@ uint32_t hal_get_systick_freq() {
   */
 void TIM1_UP_TIM16_IRQHandler(void)
 {
+  HAL_GPIO_WritePin(HALL_A_PORT, HALL_A_PIN, GPIO_PIN_SET);
   __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
   hal_run_rt();
   if(__HAL_TIM_GET_FLAG(&htim1, TIM_IT_UPDATE) == SET) {
     hal_stop();
     hal.hal_state = RT_TOO_LONG;
   }
+  HAL_GPIO_WritePin(HALL_A_PORT, HALL_A_PIN, GPIO_PIN_RESET);
 }
 
 
@@ -670,7 +679,6 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -678,11 +686,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pins : PB6 PB7 PB8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
