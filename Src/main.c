@@ -174,6 +174,7 @@ int main(void)
   hal_parse("load term");
   hal_parse("load sim");
   hal_parse("term0.rt_prio = 15");
+  hal_parse("term0.send_step = 0");
 
   hal_parse("load sim");
   hal_parse("sim0.rt_prio = 14");
@@ -182,7 +183,7 @@ int main(void)
 
   while(1) {
     hal_run_nrt();
-    HAL_Delay(1);
+    cdc_poll();
   }
   /* USER CODE END 3 */
 }
@@ -640,7 +641,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

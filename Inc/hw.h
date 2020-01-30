@@ -12,3 +12,5 @@
 #define HALL_B_PORT GPIOB
 #define HALL_C_PIN GPIO_PIN_8
 #define HALL_C_PORT GPIOB
+
+#define UART USART2
