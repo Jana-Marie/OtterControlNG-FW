@@ -75,6 +75,8 @@ static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
 void TIM1_UP_TIM16_IRQHandler(void);
 
+volatile uint64_t systime;
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -137,6 +139,47 @@ int main(void)
   PWM_W = 0;
 
   
+  
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  GPIO_InitStruct.Pin = HALL_A_PIN | HALL_B_PIN | HALL_C_PIN;
+  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(HALL_A_PORT, &GPIO_InitStruct);
+
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  hal_init(1.0 / 20000.0, 0.0);
+  // hal load comps
+  hal_parse("load term");
+  hal_parse("load sim");
+  hal_parse("term0.rt_prio = 15");
+  hal_parse("term0.send_step = 0");
+
+  hal_parse("load hv");
+  hal_parse("hv0.rt_prio = 1");
+  hal_parse("load svm");
+  hal_parse("svm0.rt_prio = 1");
+  hal_parse("hv0.udc = 100");
+  hal_parse("svm0.udc = 100");
+  hal_parse("sim0.rt_prio = 14");
+  hal_parse("load idq");
+  hal_parse("idq0.rt_prio = 1");
+  hal_parse("hv0.u = svm0.su");
+  hal_parse("hv0.v = svm0.sv");
+  hal_parse("hv0.w = svm0.sw");
+  hal_parse("svm0.u = idq0.u");
+  hal_parse("svm0.v = idq0.v");
+  hal_parse("svm0.w = idq0.w");
+  hal_parse("idq0.mode = 2");
+  hal_parse("svm0.mode = 1");
+  hal_parse("idq0.pos = sim0.vel");
+
+  hal_start();
+
   if(HAL_TIM_Base_Start_IT(&htim1) != HAL_OK) {
     Error_Handler();
   }
@@ -159,28 +202,6 @@ int main(void)
   if(HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3) != HAL_OK) {
     Error_Handler();
   }
-
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  GPIO_InitStruct.Pin = HALL_A_PIN | HALL_B_PIN | HALL_C_PIN;
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(HALL_A_PORT, &GPIO_InitStruct);
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  hal_init(1.0 / 20000.0, 0.0);
-  // hal load comps
-  hal_parse("load term");
-  hal_parse("load sim");
-  hal_parse("term0.rt_prio = 15");
-  hal_parse("term0.send_step = 0");
-
-  hal_parse("load sim");
-  hal_parse("sim0.rt_prio = 14");
-
-  hal_start();
 
   while(1) {
     hal_run_nrt();
@@ -212,10 +233,10 @@ void TIM1_UP_TIM16_IRQHandler(void)
   HAL_GPIO_WritePin(HALL_A_PORT, HALL_A_PIN, GPIO_PIN_SET);
   __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
   hal_run_rt();
-  if(__HAL_TIM_GET_FLAG(&htim1, TIM_IT_UPDATE) == SET) {
-    hal_stop();
-    hal.hal_state = RT_TOO_LONG;
-  }
+  //if(__HAL_TIM_GET_FLAG(&htim1, TIM_IT_UPDATE) == SET) {
+  //  hal_stop();
+  //  hal.hal_state = RT_TOO_LONG;
+  //}
   HAL_GPIO_WritePin(HALL_A_PORT, HALL_A_PIN, GPIO_PIN_RESET);
 }
 
@@ -235,12 +256,11 @@ void SystemClock_Config(void)
   HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1_BOOST);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV2;
   RCC_OscInitStruct.PLL.PLLN = 85;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
@@ -516,12 +536,16 @@ static void MX_TIM1_Init(void)
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED3;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
   htim1.Init.Period = PWM_RES; // 40kHz center aligned
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
+  // if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  // {
+  //   Error_Handler();
+  // }
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -532,24 +556,24 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
   sConfigOC.Pulse = 0;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
   sConfigOC.Pulse = 0;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }

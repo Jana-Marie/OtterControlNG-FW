@@ -12,7 +12,7 @@ void cdc_poll() {
   uint8_t byte;
   if(UART->ISR & USART_ISR_TC){
     if(rb_getc(&tx_buf, &byte)){
-      UART->RDR = byte;
+      UART->TDR = byte;
     }
   }
   
