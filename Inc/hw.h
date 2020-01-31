@@ -14,3 +14,4 @@
 #define HALL_C_PORT GPIOB
 
 #define UART USART2
+#define UART_SPEED 9600
