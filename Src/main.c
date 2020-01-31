@@ -109,6 +109,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  // Flash prefetch
+  FLASH->ACR |= FLASH_ACR_PRFTEN;
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
