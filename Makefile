@@ -42,6 +42,7 @@ Src/comps/sim.c \
 Src/comps/dq.c \
 Src/comps/idq.c \
 Src/comps/hv.c \
+Src/comps/svm.c \
 Src/comps/term.c
 
 C_SOURCES =  \
@@ -157,6 +158,7 @@ CFLAGS += -Wuninitialized
 CFLAGS += -fno-builtin
 CFLAGS += -nostartfiles
 CFLAGS += -Wfatal-errors
+CFLAGS += -fsingle-precision-constant
 
 
 ifeq ($(DEBUG), 1)
@@ -177,7 +179,7 @@ LDSCRIPT = STM32G431CBUx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections -u _printf_float -u _scanf_float
 
 # default action: build all
 all: tbl $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
@@ -186,7 +188,7 @@ tbl:
 	@echo Generating tables
 	@$(PYTHON) tools/create_hal_tbl.py ./ $(COMPS)
 	#shared/comps/*.c src/comps/hw/*.c src/comps/*.c
-	@$(PYTHON) tools/create_cmd.py $(SOURCES) > Inc/commandslist.h
+	@$(PYTHON) tools/create_cmd.py $(C_SOURCES) > Inc/commandslist.h
 
 #######################################
 # build the application
