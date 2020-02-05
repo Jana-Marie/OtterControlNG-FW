@@ -76,7 +76,7 @@ static void MX_USART2_UART_Init(void);
 void TIM1_UP_TIM16_IRQHandler(void);
 
 volatile uint64_t systime;
-
+uint16_t otter[2];
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -141,8 +141,8 @@ int main(void)
   PWM_V = 0;
   PWM_W = 0;
 
-
-
+  HAL_ADC_Start(&hadc1);
+  HAL_ADC_Start(&hadc2);
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -242,6 +242,8 @@ void TIM1_UP_TIM16_IRQHandler(void)
   HAL_GPIO_WritePin(HALL_A_PORT, HALL_A_PIN, GPIO_PIN_SET);
   __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
   hal_run_rt();
+  //otter[0] = HAL_ADC_GetValue(&hadc1);
+  //otter[1] = HAL_ADC_GetValue(&hadc2);
   //if(__HAL_TIM_GET_FLAG(&htim1, TIM_IT_UPDATE) == SET) {
   //  hal_stop();
   //  hal.hal_state = RT_TOO_LONG;
