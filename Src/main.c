@@ -110,7 +110,7 @@ int main(void)
   SystemClock_Config();
 
   // Flash prefetch
-  FLASH->ACR |= FLASH_ACR_PRFTEN;
+//  FLASH->ACR |= FLASH_ACR_PRFTEN;
 
   /* USER CODE BEGIN SysInit */
 
@@ -155,7 +155,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  hal_init(1.0 / 20000.0, 0.0);
+  hal_init(1.0 / 15000.0, 0.0);
   // hal load comps
   hal_parse("load term");
   hal_parse("load sim");
